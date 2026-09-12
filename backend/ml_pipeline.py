@@ -64,13 +64,13 @@ class MLPipeline:
         state_dict = ckpt["model_state_dict"] if "model_state_dict" in ckpt else ckpt
         self.model1.load_state_dict(state_dict)
         self.model1.eval()
-        print("✅ Model 1 successfully initialized on", DEVICE)
+        print("Model 1 successfully initialized on", DEVICE)
 
     def _load_model2(self):
         print("Loading Model 2 (XGBoost Carbon Regressor)...")
         self.model2 = joblib.load(self.m2_path)
         self.scaler = joblib.load(self.m2_scaler_path)
-        print("✅ Model 2 and Scaler successfully initialized")
+        print("Model 2 and Scaler successfully initialized")
 
     def preprocess_image(self, pil_image):
         """Converts PIL image to normalized tensor for ResNet-18."""
@@ -133,28 +133,28 @@ class MLPipeline:
         """Biological alert classification matching the trained model."""
         if dissolved_oxygen < 2.0:
             return {
-                "status": "⚠️ Anoxia Risk — Aerate Immediately",
+                "status": "Anoxia Risk — Aerate Immediately",
                 "code": "CRITICAL_ANOXIA",
                 "severity": "danger",
                 "recommendation": "Emergency: Dissolved oxygen < 2.0 mg/L causes catastrophic fish kill and anaerobic decay. Activate surface aerators and micro-bubble sparging immediately."
             }
         elif daily_co2 > 500 and coverage > 60:
             return {
-                "status": "🌿 Optimal Harvest Window",
+                "status": "Optimal Harvest Window",
                 "code": "OPTIMAL_HARVEST",
                 "severity": "success",
                 "recommendation": "Peak biomass density achieved with maximum carbon fixation. Harvest now to prevent self-shading, nutrient exhaustion, and nocturnal oxygen crashes."
             }
         elif daily_co2 > 50:
             return {
-                "status": "✅ Active Carbon Sequestration",
+                "status": "Active Carbon Sequestration",
                 "code": "ACTIVE_SEQUESTRATION",
                 "severity": "optimal",
                 "recommendation": "Algae culture actively photosynthesizing. Water parameters are well-balanced for continuous carbon fixation."
             }
         else:
             return {
-                "status": "💤 Minimal Sequestration Activity",
+                "status": "Minimal Sequestration Activity",
                 "code": "MINIMAL_ACTIVITY",
                 "severity": "neutral",
                 "recommendation": "Low biological fixation. Check solar irradiance, water temperature, or nutrient levels to stimulate growth."

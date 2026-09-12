@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ALGAEVERSE — Full AI Architecture (Model 1 & Model 2)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0B1120;
+      --card-bg: #1E293B;
+      --card-border: #334155;
+      --cyan: #06B6D4;
+      --cyan-light: rgba(6, 182, 212, 0.15);
+      --green: #10B981;
+      --green-light: rgba(16, 185, 129, 0.15);
+      --purple: #8B5CF6;
+      --purple-light: rgba(139, 92, 246, 0.15);
+      --amber: #F59E0B;
+      --amber-light: rgba(245, 158, 11, 0.15);
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 3rem 1.5rem;
+      line-height: 1.5;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.08) 0%, transparent 40%);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* HEADER */
+    .header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 0.35rem 1rem;
+      background: var(--green-light);
+      color: #34D399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.8rem;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      margin-bottom: 0.6rem;
+      letter-spacing: -0.02em;
+    }
+
+    h1 span.c1 { color: #38BDF8; }
+    h1 span.c2 { color: #34D399; }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.15rem;
+      max-width: 750px;
+      margin: 0 auto;
+    }
+
+    /* SECTION CONTAINERS */
+    .model-section {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 2.2rem 1.8rem;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .section-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.8rem;
+      padding-bottom: 1.2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .section-pill {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.3rem 0.8rem;
+      border-radius: 999px;
+    }
+
+    .pill-m1 { background: var(--cyan-light); color: #38BDF8; border: 1px solid rgba(6, 182, 212, 0.3); }
+    .pill-m2 { background: var(--green-light); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+    /* 3-COLUMN FLOW GRID */
+    .flow-grid {
+      display: grid;
+      grid-template-columns: 1fr 50px 1.1fr 50px 1fr;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    @media (max-width: 960px) {
+      .flow-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      .arrow {
+        transform: rotate(90deg);
+        margin: 0.5rem auto;
+      }
+    }
+
+    .col-header {
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .col-in { color: #38BDF8; }
+    .col-brain { color: #34D399; }
+    .col-out { color: #A78BFA; }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      transition: transform 0.15s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: #475569;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.2rem;
+    }
+
+    .card-title {
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: #FFF;
+    }
+
+    .card-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+    }
+
+    .card-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .group-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748B;
+      letter-spacing: 0.05em;
+      margin-top: 0.5rem;
+    }
+
+    /* CENTER AI BRAIN CARDS */
+    .brain-box {
+      background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%);
+      border-radius: 16px;
+      padding: 1.8rem 1.4rem;
+      text-align: center;
+    }
+
+    .brain-box.m1 {
+      border: 2px solid #06B6D4;
+      box-shadow: 0 0 30px rgba(6, 182, 212, 0.15);
+    }
+
+    .brain-box.m2 {
+      border: 2px solid #10B981;
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.15);
+    }
+
+    .brain-icon {
+      font-size: 2rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .brain-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #FFF;
+      margin-bottom: 0.2rem;
+    }
+
+    .brain-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      margin-bottom: 1.2rem;
+    }
+
+    .brain-tag.m1 { color: #38BDF8; background: var(--cyan-light); }
+    .brain-tag.m2 { color: #34D399; background: var(--green-light); }
+
+    .brain-points {
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .point {
+      display: flex;
+      gap: 0.7rem;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 0.7rem 0.8rem;
+      font-size: 0.8rem;
+    }
+
+    .point-num {
+      font-weight: 800;
+    }
+
+    .point-num.m1 { color: #38BDF8; }
+    .point-num.m2 { color: #34D399; }
+
+    .point-text strong {
+      color: #FFF;
+      display: block;
+      margin-bottom: 0.15rem;
+    }
+
+    .point-text span {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .arrow {
+      text-align: center;
+      color: #64748B;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    /* CONNECTOR BETWEEN MODEL 1 AND MODEL 2 */
+    .bridge-connector {
+      background: linear-gradient(90deg, rgba(6, 182, 212, 0.15) 0%, rgba(16, 185, 129, 0.15) 100%);
+      border: 1px dashed rgba(52, 211, 153, 0.4);
+      border-radius: 14px;
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0 2rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .bridge-text {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #E2E8F0;
+    }
+
+    .bridge-badge {
+      background: #10B981;
+      color: #0F172A;
+      font-weight: 800;
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- Main Header -->
+    <div class="header">
+      <div class="tag">Complete AI Pipeline Overview</div>
+      <h1><span>ALGAEVERSE:</span> <span class="c1">Model 1</span> &amp; <span class="c2">Model 2</span></h1>
+      <p class="subtitle">A simple, step-by-step visual map showing how satellite imagery and IoT probes are transformed into verified carbon credits.</p>
+    </div>
+
+    <!-- ====================================================================
+         SECTION 1: MODEL 1 (COMPUTER VISION)
+         ==================================================================== -->
+    <div class="model-section" style="border-top: 3px solid #06B6D4;">
+      <div class="section-banner">
+        <div class="section-title">
+          <span>Model 1:</span> Satellite Vision &amp; Bloom Detector
+        </div>
+        <div class="section-pill pill-m1">Deep Learning (ResNet-18) + Chlorophyll Color Analysis</div>
+      </div>
+
+      <div class="flow-grid">
+
+        <!-- M1: INPUT -->
+        <div>
+          <div class="col-header col-in">
+            <span>Input</span> (Satellite Image)
+          </div>
+
+          <div class="stack">
+            <div class="card" style="border-left: 3px solid #06B6D4;">
+              <div class="card-top">
+                <span class="card-title">Satellite Picture</span>
+                <span class="card-badge">RGB / Sentinel-2</span>
+              </div>
+              <div class="card-desc">Aerial photo of the lake (either Sentinel-2 satellite capture or direct photo upload).</div>
+            </div>
+
+            <div class="card" style="border-left: 3px solid #06B6D4;">
+              <div class="card-top">
+                <span class="card-title">Total Catchment Area</span>
+                <span class="card-badge">Hectares (ha)</span>
+              </div>
+              <div class="card-desc">Total lake boundary size (e.g., 50.0 hectares) used to scale pixel calculations.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ARROW -->
+        <div class="arrow">➜</div>
+
+        <!-- M1: BRAIN -->
+        <div>
+          <div class="col-header col-brain">
+            <span>How Model 1 Works</span>
+          </div>
+
+          <div class="brain-box m1">
+            <div class="brain-icon">🛰️</div>
+            <div class="brain-title">ResNet-18 Vision AI</div>
+            <div class="brain-tag m1">Convolutional Neural Network</div>
+
+            <div class="brain-points">
+              <div class="point">
+                <div class="point-num m1">1</div>
+                <div class="point-text">
+                  <strong>Color &amp; Texture Recognition</strong>
+                  <span>Deep ResNet-18 neural network scans the scene to identify algae severity patterns.</span>
+                </div>
+              </div>
+
+              <div class="point">
+                <div class="point-num m1">2</div>
+                <div class="point-text">
+                  <strong>Chlorophyll Color Index (ExG)</strong>
+                  <span>Calculates green intensity (2×Green − Red − Blue) to isolate living algae from water.</span>
+                </div>
+              </div>
+
+              <div class="point">
+                <div class="point-num m1">3</div>
+                <div class="point-text">
+                  <strong>Water Masking</strong>
+                  <span>Ignores shoreline and clouds so only lake surface pixels are counted.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ARROW -->
+        <div class="arrow">➜</div>
+
+        <!-- M1: OUTPUT -->
+        <div>
+          <div class="col-header col-out">
+            <span>Outputs</span> (3 Visual Metrics)
+          </div>
+
+          <div class="stack">
+            <div class="card" style="border-left: 3px solid #06B6D4;">
+              <div class="card-top">
+                <span class="card-title">Bloom Area</span>
+                <span class="card-badge">e.g. 30.0 ha</span>
+              </div>
+              <div class="card-desc">Exact surface area covered by green algae on the lake.</div>
+            </div>
+
+            <div class="card" style="border-left: 3px solid #06B6D4;">
+              <div class="card-top">
+                <span class="card-title">Coverage %</span>
+                <span class="card-badge">e.g. 60.0%</span>
+              </div>
+              <div class="card-desc">Percentage of the total water body covered by algae.</div>
+            </div>
+
+            <div class="card" style="border-left: 3px solid #06B6D4;">
+              <div class="card-top">
+                <span class="card-title">Severity Level</span>
+                <span class="card-badge">Low / Med / High</span>
+              </div>
+              <div class="card-desc">Bloom density: Low (thin film), Moderate, or High (thick green scum).</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         BRIDGE CONNECTOR (M1 OUTPUTS + IOT SENSORS -> MODEL 2)
+         ==================================================================== -->
+    <div class="bridge-connector">
+      <div class="bridge-text">
+        <span style="font-size: 1.4rem;">🔗</span>
+        <span><strong>Automated Hand-off:</strong> Model 1's visual results combine with 4 live IoT water probes to feed directly into Model 2.</span>
+      </div>
+      <div class="bridge-badge">Next: Carbon Calculation</div>
+    </div>
+
+    <!-- ====================================================================
+         SECTION 2: MODEL 2 (CARBON & ECONOMICS ENGINE)
+         ==================================================================== -->
+    <div class="model-section" style="border-top: 3px solid #10B981;">
+      <div class="section-banner">
+        <div class="section-title">
+          <span>Model 2:</span> Carbon Sequestration &amp; Economics Engine
+        </div>
+        <div class="section-pill pill-m2">XGBoost Multi-Output Machine Learning Regressor</div>
+      </div>
+
+      <div class="flow-grid">
+
+        <!-- M2: INPUTS -->
+        <div>
+          <div class="col-header col-in">
+            <span>7 Inputs</span> (Visual + Probes)
+          </div>
+
+          <div class="stack">
+            <div class="group-label">From Model 1 (Above)</div>
+            <div class="card" style="border-left: 3px solid #0284C7;">
+              <div class="card-top">
+                <span class="card-title">Bloom Area + Coverage % + Severity</span>
+              </div>
+              <div class="card-desc">Size, surface coverage, and thickness of the algae colony.</div>
+            </div>
+
+            <div class="group-label">From IoT Water Probes</div>
+            <div class="card" style="border-left: 3px solid #10B981;">
+              <div class="card-top">
+                <span class="card-title">Water Temp</span>
+                <span class="card-badge">°C</span>
+              </div>
+              <div class="card-desc">Warm water (~27°C) speeds up growth; cold stops it.</div>
+            </div>
+
+            <div class="card" style="border-left: 3px solid #10B981;">
+              <div class="card-top">
+                <span class="card-title">pH Level</span>
+                <span class="card-badge">pH</span>
+              </div>
+              <div class="card-desc">Is water balanced? (Algae loves slightly alkaline 7.5–8.5).</div>
+            </div>
+
+            <div class="card" style="border-left: 3px solid #10B981;">
+              <div class="card-top">
+                <span class="card-title">Dissolved Oxygen</span>
+                <span class="card-badge">mg/L</span>
+              </div>
+              <div class="card-desc">Shows active photosynthesis vs rotting decay (&lt; 2.0 suffocates fish).</div>
+            </div>
+
+            <div class="card" style="border-left: 3px solid #10B981;">
+              <div class="card-top">
+                <span class="card-title">Sunlight</span>
+                <span class="card-badge">W/m²</span>
+              </div>
+              <div class="card-desc">Solar energy powering photosynthesis.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ARROW -->
+        <div class="arrow">➜</div>
+
+        <!-- M2: BRAIN -->
+        <div>
+          <div class="col-header col-brain">
+            <span>How Model 2 Works</span>
+          </div>
+
+          <div class="brain-box m2">
+            <div class="brain-icon">⚡</div>
+            <div class="brain-title">XGBoost ML Regressor</div>
+            <div class="brain-tag m2">300 Boosted Decision Trees</div>
+
+            <div class="brain-points">
+              <div class="point">
+                <div class="point-num m2">1</div>
+                <div class="point-text">
+                  <strong>Trained on 15,000 Scenarios</strong>
+                  <span>Learned how temperature, light, pH, and oxygen interact together.</span>
+                </div>
+              </div>
+
+              <div class="point">
+                <div class="point-num m2">2</div>
+                <div class="point-text">
+                  <strong>Golden Biology Chemistry Rule</strong>
+                  <span><mark style="background:#065F46; color:#A7F3D0; padding:2px 4px; border-radius:3px;">1 kg dry algae = 1.83 kg CO₂ absorbed</mark></span>
+                </div>
+              </div>
+
+              <div class="point">
+                <div class="point-num m2">3</div>
+                <div class="point-text">
+                  <strong>Anoxia Safety Alarm</strong>
+                  <span>If oxygen drops below 2.0 mg/L, alerts operators to aerate water and save the fish.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ARROW -->
+        <div class="arrow">➜</div>
+
+        <!-- M2: OUTPUTS -->
+        <div>
+          <div class="col-header col-out">
+            <span>4 Final Outputs</span> (Value &amp; Alerts)
+          </div>
+
+          <div class="stack">
+            <div class="card" style="border-left: 3px solid #8B5CF6;">
+              <div class="card-top">
+                <span class="card-title">Daily Biomass Yield</span>
+                <span class="card-badge">kg / day</span>
+              </div>
+              <div class="card-desc">Total dry weight of algae grown today (e.g. <strong>675 kg/day</strong>).</div>
+            </div>
+
+            <div class="card" style="border-left: 3px solid #8B5CF6;">
+              <div class="card-top">
+                <span class="card-title">Daily CO₂ Sequestered</span>
+                <span class="card-badge">kg CO₂ / day</span>
+              </div>
+              <div class="card-desc">Harmful greenhouse gas removed from air today (e.g. <strong>993 kg</strong>).</div>
+            </div>
+
+            <div class="card" style="border-left: 3px solid #8B5CF6;">
+              <div class="card-top">
+                <span class="card-title">Monthly CO₂ Projection</span>
+                <span class="card-badge">Metric Tons</span>
+              </div>
+              <div class="card-desc">Total cumulative carbon trapped in 30 days (e.g. <strong>26.8 tons/mo</strong>).</div>
+            </div>
+
+            <div class="card" style="border-left: 3px solid #8B5CF6;">
+              <div class="card-top">
+                <span class="card-title">Carbon Credit Earnings</span>
+                <span class="card-badge">$ USD</span>
+              </div>
+              <div class="card-desc">Market value: 26.8 tons × $35 = <strong>$916.90 USD / month</strong>.</div>
+            </div>
+
+            <div class="card" style="border: 1px solid #10B981; background: rgba(16, 185, 129, 0.08);">
+              <div class="card-top">
+                <span class="card-title" style="color: #34D399;">Ecosystem Health Status</span>
+                <span class="card-badge" style="color: #34D399;">Real-Time</span>
+              </div>
+              <div class="card-desc">Action prompt: <strong>Leave alone</strong>, <strong>Harvest now</strong>, or <strong>Emergency aeration</strong>.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

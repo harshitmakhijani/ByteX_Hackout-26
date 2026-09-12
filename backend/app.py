@@ -121,7 +121,7 @@ async def get_presets():
     return [
         {
             "id": "optimal_harvest",
-            "name": "🌿 Peak Harvest Window",
+            "name": "Peak Harvest Window",
             "badge": "Maximum Carbon Credit",
             "description": "Optimal photosynthesis parameters. Dense bloom without oxygen depletion. High carbon monetization.",
             "values": {
@@ -136,7 +136,7 @@ async def get_presets():
         },
         {
             "id": "anoxia_emergency",
-            "name": "⚠️ Severe Anoxia Emergency",
+            "name": "Severe Anoxia Emergency",
             "badge": "Aeration Required",
             "description": "Critical oxygen crash (DO < 2.0 mg/L) caused by nocturnal respiration. Urgent fish-kill risk!",
             "values": {
@@ -151,7 +151,7 @@ async def get_presets():
         },
         {
             "id": "pristine_baseline",
-            "name": "💧 Pristine Clean Water",
+            "name": "Pristine Clean Water",
             "badge": "Zero Bloom Baseline",
             "description": "Clear oligotrophic water. High dissolved oxygen, low biomass, baseline carbon fixation.",
             "values": {
@@ -166,7 +166,7 @@ async def get_presets():
         },
         {
             "id": "eutrophication_spurt",
-            "name": "🧪 Rapid Eutrophication Spurt",
+            "name": "Rapid Eutrophication Spurt",
             "badge": "Early Warning",
             "description": "Early stage algal bloom expansion following agricultural fertilizer runoff.",
             "values": {
@@ -323,6 +323,18 @@ async def get_location_comparison(location_id: str):
     db_service = get_firestore_service()
     comparison = db_service.get_comparison(location_id)
     return comparison
+
+
+@app.api_route("/api/clear-database", methods=["GET", "POST"])
+async def clear_database():
+    """Purges all dummy and live data from both local cache and cloud Firebase Firestore."""
+    db_service = get_firestore_service()
+    success = db_service.clear_all()
+    return {
+        "status": "success",
+        "message": "All database records purged from local database and Firebase Firestore.",
+        "cleared": success
+    }
 
 
 @app.get("/api/health")

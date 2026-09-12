@@ -31,8 +31,7 @@ class FirestoreTelemetryService:
             except Exception as e:
                 print(f"Error loading local telemetry DB: {e}")
         
-        # Default seed history with authentic historical observations for famous lakes
-        return self._get_initial_seed_data()
+        return {}
 
     def _save_local_db(self):
         try:
@@ -41,54 +40,20 @@ class FirestoreTelemetryService:
         except Exception as e:
             print(f"Error saving local DB: {e}")
 
-    def _get_initial_seed_data(self):
-        """Initial historical records to populate trend charts out-of-the-box."""
-        now = datetime.datetime.now(datetime.timezone.utc)
-        return {
-            "chilika_lake": [
-                {
-                    "id": "seed_chilika_1",
-                    "timestamp": (now - datetime.timedelta(days=14)).isoformat(),
-                    "location_id": "chilika_lake",
-                    "location_name": "Chilika Lagoon, Odisha",
-                    "coverage_pct": 32.4,
-                    "bloom_area_ha": 16.2,
-                    "daily_co2_kg": 1820.5,
-                    "dissolved_oxygen_mg_l": 8.8,
-                    "water_temp_c": 24.2,
-                    "severity": "Moderate",
-                    "ecosystem_status": "✅ Active Carbon Sequestration"
-                },
-                {
-                    "id": "seed_chilika_2",
-                    "timestamp": (now - datetime.timedelta(days=7)).isoformat(),
-                    "location_id": "chilika_lake",
-                    "location_name": "Chilika Lagoon, Odisha",
-                    "coverage_pct": 48.1,
-                    "bloom_area_ha": 24.0,
-                    "daily_co2_kg": 3450.2,
-                    "dissolved_oxygen_mg_l": 7.9,
-                    "water_temp_c": 26.0,
-                    "severity": "Moderate",
-                    "ecosystem_status": "✅ Active Carbon Sequestration"
-                }
-            ],
-            "lake_erie": [
-                {
-                    "id": "seed_erie_1",
-                    "timestamp": (now - datetime.timedelta(days=10)).isoformat(),
-                    "location_id": "lake_erie",
-                    "location_name": "Lake Erie (Sandusky Basin)",
-                    "coverage_pct": 52.0,
-                    "bloom_area_ha": 65.0,
-                    "daily_co2_kg": 4200.0,
-                    "dissolved_oxygen_mg_l": 6.5,
-                    "water_temp_c": 23.5,
-                    "severity": "High",
-                    "ecosystem_status": "✅ Active Carbon Sequestration"
-                }
-            ]
-        }
+    def clear_all(self):
+        """Purges all in-memory, local JSON, and cloud Firestore records."""
+        self.local_db = {}
+        self._save_local_db()
+        try:
+            resp = requests.get(f"{FIRESTORE_URL}?key={FIREBASE_API_KEY}&pageSize=300", timeout=5)
+            if resp.status_code == 200:
+                docs = resp.json().get("documents", [])
+                for doc in docs:
+                    name = doc.get("name")
+                    requests.delete(f"https://firestore.googleapis.com/v1/{name}?key={FIREBASE_API_KEY}", timeout=5)
+        except Exception as e:
+            print(f"Error purging Firestore: {e}")
+        return True
 
     def calculate_deltas(self, current_data, previous_data):
         """Computes % change and trend badges between consecutive scans."""
@@ -99,7 +64,7 @@ class FirestoreTelemetryService:
                 "co2_delta_pct": "+0.0%",
                 "do_delta_pct": "+0.0%",
                 "summary": "Baseline observation established",
-                "trend_badge": "🌱 New Monitoring Station",
+                "trend_badge": "Baseline Monitoring Station",
                 "coverage_numeric_delta": 0.0,
                 "co2_numeric_delta": 0.0
             }
@@ -122,16 +87,16 @@ class FirestoreTelemetryService:
         do_sign = "+" if do_delta >= 0 else ""
 
         if cov_delta > 15.0:
-            badge = f"📈 {cov_sign}{cov_delta:.1f}% Bloom Expansion"
+            badge = f"{cov_sign}{cov_delta:.1f}% Bloom Expansion"
         elif cov_delta < -15.0:
-            badge = f"📉 {cov_delta:.1f}% Bloom Regression"
+            badge = f"{cov_delta:.1f}% Bloom Regression"
         else:
-            badge = f"⚖️ Stable Algae Population ({cov_sign}{cov_delta:.1f}%)"
+            badge = f"Stable Algae Population ({cov_sign}{cov_delta:.1f}%)"
 
         if do_delta < -20.0 or curr_do < 2.5:
-            summary = f"⚠️ Critical DO drop ({do_sign}{do_delta:.1f}%). High risk of anoxia!"
+            summary = f"Critical DO drop ({do_sign}{do_delta:.1f}%). High risk of anoxia."
         elif co2_delta > 10.0:
-            summary = f"🚀 Carbon sequestration surging by {co2_sign}{co2_delta:.1f}%!"
+            summary = f"Carbon sequestration surging by {co2_sign}{co2_delta:.1f}%."
         else:
             summary = f"Algae coverage changed by {cov_sign}{cov_delta:.1f}% compared to previous scan."
 
@@ -152,6 +117,7 @@ class FirestoreTelemetryService:
         Saves record to local DB and attempts sync to Firebase Firestore.
         Returns record enriched with historical deltas.
         """
+        self.local_db = self._load_local_db()
         location_id = record_data.get("location_id", "custom_location")
         history = self.local_db.setdefault(location_id, [])
 
@@ -196,7 +162,7 @@ class FirestoreTelemetryService:
             url = f"{FIRESTORE_URL}?documentId={doc_id}&key={FIREBASE_API_KEY}"
             resp = requests.post(url, json={"fields": fields}, timeout=3)
             if resp.status_code in [200, 201]:
-                print(f"✅ Telemetry record {doc_id} synced to Firebase Firestore")
+                print(f"[Firestore] Telemetry record {doc_id} synced to Firebase Firestore")
                 return True
             else:
                 print(f"Firestore sync response: {resp.status_code} - {resp.text[:100]}")
@@ -207,6 +173,7 @@ class FirestoreTelemetryService:
 
     def get_history(self, location_id, limit=10):
         """Returns historical scans for a location."""
+        self.local_db = self._load_local_db()
         history = self.local_db.get(location_id, [])
         return history[-limit:]
 
@@ -240,6 +207,7 @@ class FirestoreTelemetryService:
 
     def get_timeline(self, location_id, limit=20):
         """Returns full timeline of scans for a location, enriched for dashboard display."""
+        self.local_db = self._load_local_db()
         history = self.local_db.get(location_id, [])
         timeline = []
         for record in history[-limit:]:
@@ -270,6 +238,7 @@ class FirestoreTelemetryService:
 
     def get_comparison(self, location_id):
         """Returns latest and previous records for side-by-side comparison."""
+        self.local_db = self._load_local_db()
         history = self.local_db.get(location_id, [])
         latest = history[-1] if len(history) >= 1 else None
         previous = history[-2] if len(history) >= 2 else None

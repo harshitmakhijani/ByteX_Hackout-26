@@ -13,8 +13,8 @@ const appState = {
     region: 'Odisha, India',
     coords: '19.71° N, 85.32° E',
     type: 'Brackish Coastal Lagoon',
+    sensor: 'Sentinel-2 MSI • 10m',
     default_bloom_ha: 35.0,
-    flag: '🌊',
     sample_image: 'satellite_dense_bloom.jpg'
   },
   selectedImageSource: 'library', // 'library' | 'upload'
@@ -45,8 +45,8 @@ const LOCATIONS = [
     region: 'Odisha, India',
     coords: '19.71° N, 85.32° E',
     type: 'Brackish Coastal Lagoon',
+    sensor: 'Sentinel-2 MSI • 10m',
     default_bloom_ha: 35.0,
-    flag: '🌊',
     sample_image: 'satellite_dense_bloom.jpg'
   },
   {
@@ -55,8 +55,8 @@ const LOCATIONS = [
     region: 'Ohio / Ontario, USA & Canada',
     coords: '41.83° N, 82.50° W',
     type: 'Freshwater Great Lake',
+    sensor: 'Sentinel-2 MSI • 10m',
     default_bloom_ha: 65.0,
-    flag: '🏞️',
     sample_image: 'sample_lake_erie.png'
   },
   {
@@ -65,8 +65,8 @@ const LOCATIONS = [
     region: 'Jiangsu, China',
     coords: '31.22° N, 120.15° E',
     type: 'Subtropical Shallow Eutrophic Lake',
+    sensor: 'Sentinel-2 MSI • 10m',
     default_bloom_ha: 80.0,
-    flag: '🌾',
     sample_image: 'satellite_dense_bloom.jpg'
   },
   {
@@ -75,8 +75,8 @@ const LOCATIONS = [
     region: 'Bengaluru, Karnataka, India',
     coords: '12.93° N, 77.67° E',
     type: 'Hyper-Eutrophic Urban Catchment',
+    sensor: 'Sentinel-2 MSI • 10m',
     default_bloom_ha: 22.0,
-    flag: '🏙️',
     sample_image: 'sample_lake_erie.png'
   },
   {
@@ -85,8 +85,8 @@ const LOCATIONS = [
     region: 'California / Nevada, USA',
     coords: '39.09° N, 120.03° W',
     type: 'Oligotrophic Alpine Lake',
+    sensor: 'Sentinel-2 MSI • 10m',
     default_bloom_ha: 2.0,
-    flag: '💧',
     sample_image: 'satellite_pristine_water.jpg'
   }
 ];
@@ -218,12 +218,21 @@ function renderLocationCards() {
     card.innerHTML = `
       <div class="location-thumb-wrapper">
         <img src="/static/images/${loc.sample_image}" alt="${loc.name}" class="location-thumb">
-        <div class="location-flag-badge">${loc.flag}</div>
-        <div class="location-check-indicator">✓</div>
+        <div class="location-sensor-badge">
+          <span class="sensor-live-dot"></span>
+          <span>${loc.sensor || 'Sentinel-2 MSI'}</span>
+        </div>
+        <div class="location-check-indicator">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
       </div>
       <div class="location-card-content">
         <div class="location-name">${loc.name}</div>
-        <div class="location-region">${loc.region}</div>
+        <div class="location-region">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:baseline;margin-right:3px;opacity:0.65;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${loc.region}
+        </div>
         <div class="location-meta-row">
           <span class="location-coords">${loc.coords}</span>
           <span class="location-type-pill">${loc.type.split(' ')[0]}</span>
@@ -263,6 +272,7 @@ function selectLocation(locId) {
 
   // Fetch Firestore history & comparison for this newly selected location
   loadLocationTimeline(loc.id);
+  loadLocationComparison(loc.id);
 }
 
 // ============================================================================
@@ -415,39 +425,7 @@ function updateParamStatusBadge(param, val) {
 // ============================================================================
 
 function initSatelliteSourcePicker() {
-  const tabLibrary = document.getElementById('tab-source-library');
-  const tabUpload = document.getElementById('tab-source-upload');
-  const libraryView = document.getElementById('view-source-library');
-  const uploadView = document.getElementById('view-source-upload');
-
-  if (tabLibrary && tabUpload) {
-    tabLibrary.addEventListener('click', () => {
-      appState.selectedImageSource = 'library';
-      tabLibrary.classList.add('active');
-      tabUpload.classList.remove('active');
-      if (libraryView) libraryView.style.display = 'block';
-      if (uploadView) uploadView.style.display = 'none';
-      selectSampleImage(appState.selectedSampleImage);
-    });
-
-    tabUpload.addEventListener('click', () => {
-      appState.selectedImageSource = 'upload';
-      tabUpload.classList.add('active');
-      tabLibrary.classList.remove('active');
-      if (libraryView) libraryView.style.display = 'none';
-      if (uploadView) uploadView.style.display = 'block';
-    });
-  }
-
-  // Library Gallery Tiles
-  document.querySelectorAll('.gallery-tile').forEach(tile => {
-    tile.addEventListener('click', () => {
-      const img = tile.dataset.image;
-      selectSampleImage(img);
-    });
-  });
-
-  // Drag & Drop / File Input
+  // Drag & Drop / File Input for Direct Upload
   const dropArea = document.getElementById('upload-drop-zone');
   const fileInput = document.getElementById('file-upload-input');
 
@@ -483,27 +461,19 @@ function initSatelliteSourcePicker() {
 }
 
 function selectSampleImage(imageName) {
-  appState.selectedSampleImage = imageName;
-  appState.uploadedFile = null;
-
-  document.querySelectorAll('.gallery-tile').forEach(t => {
-    t.classList.toggle('selected', t.dataset.image === imageName);
-  });
-
-  const preview = document.getElementById('satellite-active-preview');
-  if (preview) {
-    preview.src = `/static/images/${imageName}`;
-  }
-
-  const nameTag = document.getElementById('preview-image-name');
-  if (nameTag) {
-    nameTag.textContent = imageName;
+  // Default target image update if user hasn't uploaded custom file
+  if (!appState.uploadedFile) {
+    appState.selectedSampleImage = imageName;
+    const preview = document.getElementById('satellite-active-preview');
+    if (preview) {
+      preview.src = `/static/images/${imageName}`;
+    }
   }
 }
 
 function handleImageUpload(file) {
   if (!file.type.startsWith('image/')) {
-    showToast('⚠️ Please upload an image file (PNG, JPG, GeoTIFF)');
+    showToast('Please upload a valid image file (PNG, JPG, GeoTIFF)');
     return;
   }
 
@@ -515,10 +485,12 @@ function handleImageUpload(file) {
     const preview = document.getElementById('satellite-active-preview');
     if (preview) preview.src = e.target.result;
 
-    const nameTag = document.getElementById('preview-image-name');
-    if (nameTag) nameTag.textContent = `Custom Upload: ${file.name}`;
+    const statusBadge = document.getElementById('preview-status-badge');
+    if (statusBadge) statusBadge.textContent = 'Custom Satellite Upload';
 
-    logTerminal(`[Multispectral Ingestion] File: ${file.name} (${(file.size / 1024).toFixed(1)} KB) buffered for AI analysis`, 'log-text-green');
+    const nameTag = document.getElementById('preview-image-name');
+    if (nameTag) nameTag.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+
     showToast(`Satellite Scene Loaded: ${file.name}`);
   };
   reader.readAsDataURL(file);
@@ -540,7 +512,7 @@ async function broadcastTelemetry() {
   if (btn) {
     btn.classList.add('transmitting');
     btn.disabled = true;
-    btn.innerHTML = '<span>📡 Uplinking Telemetry Packet &bull; Running AI Models...</span>';
+    btn.innerHTML = '<span>Transmitting Telemetry Packet &bull; Running AI Models...</span>';
   }
 
   logTerminal(`[LoRaWAN Gateway] Encrypting telemetry payload for ${appState.selectedLocation.name}...`, 'log-text-cyan');
@@ -591,7 +563,7 @@ async function broadcastTelemetry() {
     await loadLocationComparison(appState.selectedLocation.id);
     await loadLocationTimeline(appState.selectedLocation.id);
 
-    showToast('🚀 Telemetry Committed to Firebase & AI Pipeline Completed!');
+    showToast('Telemetry Committed to Firebase & AI Pipeline Completed');
 
     // Smooth transition to Page 2
     setTimeout(() => {
@@ -606,7 +578,7 @@ async function broadcastTelemetry() {
     if (btn) {
       btn.classList.remove('transmitting');
       btn.disabled = false;
-      btn.innerHTML = '<span>🚀 Broadcast Telemetry &bull; Run AI Pipeline &bull; Commit to Firebase</span>';
+      btn.innerHTML = '<span>Broadcast Telemetry &bull; Run AI Pipeline &bull; Commit to Firebase</span>';
     }
   }
 }
@@ -670,9 +642,9 @@ function updateCommandCenterUI(data) {
   const badgeConf = document.getElementById('cmd-confidence-badge');
   const badgeCov = document.getElementById('cmd-coverage-badge');
 
-  if (badgeSev) badgeSev.innerHTML = `<span>🟢 Severity: ${model1_vision.severity}</span>`;
-  if (badgeConf) badgeConf.innerHTML = `<span>🎯 Confidence: ${model1_vision.confidence_pct}%</span>`;
-  if (badgeCov) badgeCov.innerHTML = `<span>📐 Coverage: ${model1_vision.coverage_pct}%</span>`;
+  if (badgeSev) badgeSev.innerHTML = `<span>Severity: ${model1_vision.severity}</span>`;
+  if (badgeConf) badgeConf.innerHTML = `<span>Confidence: ${model1_vision.confidence_pct}%</span>`;
+  if (badgeCov) badgeCov.innerHTML = `<span>Coverage: ${model1_vision.coverage_pct}%</span>`;
 
   // Probability distribution bars
   const conf = model1_vision.confidence_pct || 85;
@@ -699,6 +671,144 @@ function updateCommandCenterUI(data) {
   if (recBox) recBox.textContent = model2_carbon.recommendation;
 }
 
+function resetDashboardToAwaiting() {
+  const alertBanner = document.getElementById('cmd-ecosystem-alert');
+  const alertStatus = document.getElementById('cmd-alert-status');
+  const alertRec = document.getElementById('cmd-alert-rec');
+  if (alertBanner) alertBanner.className = 'ecosystem-alert-banner alert-optimal';
+  if (alertStatus) alertStatus.textContent = 'Awaiting Initial Telemetry Broadcast';
+  if (alertRec) alertRec.textContent = 'Broadcast IoT sensor readings or upload satellite imagery in Step 1 to run AI intelligence.';
+
+  const kpiBloom = document.getElementById('kpi-bloom-area');
+  const kpiBloomDelta = document.getElementById('kpi-bloom-delta');
+  if (kpiBloom) kpiBloom.textContent = '-- ha';
+  if (kpiBloomDelta) kpiBloomDelta.innerHTML = '<span class="delta-badge delta-neutral">Awaiting Broadcast</span>';
+
+  const kpiCo2 = document.getElementById('kpi-daily-co2');
+  const kpiCo2Delta = document.getElementById('kpi-co2-delta');
+  if (kpiCo2) kpiCo2.textContent = '-- kg';
+  if (kpiCo2Delta) kpiCo2Delta.innerHTML = '<span class="delta-badge delta-neutral">Awaiting Broadcast</span>';
+
+  const kpiCredits = document.getElementById('kpi-credits-usd');
+  const kpiBiomass = document.getElementById('kpi-biomass');
+  if (kpiCredits) kpiCredits.textContent = '--';
+  if (kpiBiomass) kpiBiomass.textContent = '-- kg/day';
+
+  const kpiDo = document.getElementById('kpi-dissolved-oxygen');
+  const kpiDoDelta = document.getElementById('kpi-do-delta');
+  if (kpiDo) kpiDo.textContent = '-- mg/L';
+  if (kpiDoDelta) kpiDoDelta.innerHTML = '<span class="delta-badge delta-neutral">Awaiting Broadcast</span>';
+
+  const badgeSev = document.getElementById('cmd-severity-badge');
+  const badgeConf = document.getElementById('cmd-confidence-badge');
+  const badgeCov = document.getElementById('cmd-coverage-badge');
+  if (badgeSev) badgeSev.innerHTML = '<span>Severity: Awaiting Scan</span>';
+  if (badgeConf) badgeConf.innerHTML = '<span>Confidence: --%</span>';
+  if (badgeCov) badgeCov.innerHTML = '<span>Coverage: --%</span>';
+
+  setProbBar('prob-high-val', 'prob-high-bar', 0);
+  setProbBar('prob-mod-val', 'prob-mod-bar', 0);
+  setProbBar('prob-low-val', 'prob-low-bar', 0);
+
+  const monthlyEl = document.getElementById('cmd-monthly-tons');
+  const annualEl = document.getElementById('cmd-annual-tons');
+  const annualCreditsEl = document.getElementById('cmd-annual-credits');
+  const recBox = document.getElementById('cmd-recommendation-box');
+  if (monthlyEl) monthlyEl.textContent = '-- t';
+  if (annualEl) annualEl.textContent = '-- t';
+  if (annualCreditsEl) annualCreditsEl.textContent = '-- USD';
+  if (recBox) recBox.textContent = 'Run simulation or broadcast sensor telemetry in Step 1 to generate carbon accounting insights.';
+}
+
+function renderRecordInDashboard(rec) {
+  if (!rec) {
+    resetDashboardToAwaiting();
+    return;
+  }
+
+  const nameEl = document.getElementById('cmd-location-name');
+  const coordsEl = document.getElementById('cmd-coords');
+  const timeEl = document.getElementById('cmd-timestamp');
+  if (nameEl) nameEl.textContent = rec.location_name || appState.selectedLocation.name;
+  if (coordsEl) coordsEl.textContent = appState.selectedLocation.coords;
+  if (timeEl && rec.timestamp) timeEl.textContent = new Date(rec.timestamp).toLocaleTimeString();
+
+  // Ecosystem Alert Banner
+  const alertBanner = document.getElementById('cmd-ecosystem-alert');
+  const alertStatus = document.getElementById('cmd-alert-status');
+  const alertRec = document.getElementById('cmd-alert-rec');
+  if (alertBanner) {
+    const sev = rec.ecosystem_severity || 'optimal';
+    const severityCls = sev === 'danger' ? 'alert-danger' : (sev === 'warning' ? 'alert-active' : 'alert-optimal');
+    alertBanner.className = `ecosystem-alert-banner ${severityCls}`;
+  }
+  if (alertStatus) alertStatus.textContent = rec.ecosystem_status || 'Active Monitoring';
+  if (alertRec) alertRec.textContent = rec.recommendation || 'Continuous telemetry active.';
+
+  // 4 KPI Cards
+  const kpiBloom = document.getElementById('kpi-bloom-area');
+  const kpiBloomDelta = document.getElementById('kpi-bloom-delta');
+  if (kpiBloom) kpiBloom.textContent = `${(rec.bloom_area_ha || 0).toFixed(1)} ha`;
+  if (kpiBloomDelta) {
+    const deltas = rec.deltas || {};
+    kpiBloomDelta.innerHTML = formatDeltaBadge(deltas.coverage_delta_pct, deltas.coverage_numeric_delta);
+  }
+
+  const kpiCo2 = document.getElementById('kpi-daily-co2');
+  const kpiCo2Delta = document.getElementById('kpi-co2-delta');
+  if (kpiCo2) kpiCo2.textContent = `${Math.round(rec.daily_co2_kg || 0).toLocaleString()} kg`;
+  if (kpiCo2Delta) {
+    const deltas = rec.deltas || {};
+    kpiCo2Delta.innerHTML = formatDeltaBadge(deltas.co2_delta_pct, deltas.co2_numeric_delta);
+  }
+
+  const kpiCredits = document.getElementById('kpi-credits-usd');
+  const kpiBiomass = document.getElementById('kpi-biomass');
+  if (kpiCredits) kpiCredits.textContent = `$${(rec.carbon_credit_usd || 0).toFixed(2)}`;
+  if (kpiBiomass) kpiBiomass.textContent = `${Math.round(rec.daily_biomass_kg || 0).toLocaleString()} kg/day`;
+
+  const kpiDo = document.getElementById('kpi-dissolved-oxygen');
+  const kpiDoDelta = document.getElementById('kpi-do-delta');
+  if (kpiDo) kpiDo.textContent = `${(rec.dissolved_oxygen_mg_l || 0).toFixed(1)} mg/L`;
+  if (kpiDoDelta) {
+    const deltas = rec.deltas || {};
+    kpiDoDelta.innerHTML = formatDeltaBadge(deltas.do_delta_pct, deltas.do_numeric_delta, true);
+  }
+
+  // Model 1 Panel
+  const cmdImg = document.getElementById('cmd-satellite-img');
+  if (cmdImg && rec.image_url) cmdImg.src = rec.image_url;
+
+  const badgeSev = document.getElementById('cmd-severity-badge');
+  const badgeConf = document.getElementById('cmd-confidence-badge');
+  const badgeCov = document.getElementById('cmd-coverage-badge');
+  if (badgeSev) badgeSev.innerHTML = `<span>Severity: ${rec.severity || 'Unknown'}</span>`;
+  if (badgeConf) badgeConf.innerHTML = `<span>Confidence: ${(rec.confidence_pct || 98).toFixed(1)}%</span>`;
+  if (badgeCov) badgeCov.innerHTML = `<span>Coverage: ${(rec.coverage_pct || 0).toFixed(1)}%</span>`;
+
+  const conf = rec.confidence_pct || 85;
+  const isHigh = (rec.severity || '').toLowerCase().includes('high');
+  const isMod = (rec.severity || '').toLowerCase().includes('moderate');
+  const pHigh = isHigh ? conf : (isMod ? (100 - conf) * 0.6 : (100 - conf) * 0.2);
+  const pMod = isMod ? conf : (isHigh ? (100 - conf) * 0.7 : (100 - conf) * 0.3);
+  const pLow = (!isHigh && !isMod) ? conf : (100 - pHigh - pMod);
+  setProbBar('prob-high-val', 'prob-high-bar', pHigh);
+  setProbBar('prob-mod-val', 'prob-mod-bar', pMod);
+  setProbBar('prob-low-val', 'prob-low-bar', pLow);
+
+  // Model 2 Panel
+  const monthlyEl = document.getElementById('cmd-monthly-tons');
+  const annualEl = document.getElementById('cmd-annual-tons');
+  const annualCreditsEl = document.getElementById('cmd-annual-credits');
+  const recBox = document.getElementById('cmd-recommendation-box');
+  const monthlyTons = rec.monthly_co2_tons || 0;
+  const monthlyCredits = rec.carbon_credit_usd || 0;
+  if (monthlyEl) monthlyEl.textContent = `${monthlyTons.toFixed(1)} t`;
+  if (annualEl) annualEl.textContent = `${(monthlyTons * 12).toFixed(1)} t`;
+  if (annualCreditsEl) annualCreditsEl.textContent = `$${Math.round(monthlyCredits * 12).toLocaleString()} USD`;
+  if (recBox) recBox.textContent = rec.recommendation || 'Continuous telemetry monitoring active.';
+}
+
 function setProbBar(valId, barId, pct) {
   const valEl = document.getElementById(valId);
   const barEl = document.getElementById(barId);
@@ -722,7 +832,7 @@ function formatDeltaBadge(deltaStr, numericVal, invertColors = false) {
     }
   }
 
-  const icon = isPos ? '📈' : (isNeutral ? '⚖️' : '📉');
+  const icon = isPos ? '↑' : (isNeutral ? '—' : '↓');
   return `<span class="delta-badge ${cls}">${icon} ${deltaStr}</span>`;
 }
 
@@ -772,6 +882,13 @@ function renderComparisonUI(comp) {
     if (latestCo2) latestCo2.textContent = `${Math.round(latest.daily_co2_kg || 0).toLocaleString()} kg`;
     if (latestCredits) latestCredits.textContent = `$${(latest.carbon_credit_usd || 0).toFixed(2)}`;
     if (latestSeverity) latestSeverity.textContent = latest.severity || 'Moderate';
+  } else {
+    if (latestTime) latestTime.textContent = 'Awaiting 1st Scan';
+    if (latestCoverage) latestCoverage.textContent = '--';
+    if (latestArea) latestArea.textContent = '--';
+    if (latestCo2) latestCo2.textContent = '--';
+    if (latestCredits) latestCredits.textContent = '--';
+    if (latestSeverity) latestSeverity.textContent = '--';
   }
 
   if (has_comparison && previous) {
@@ -784,7 +901,7 @@ function renderComparisonUI(comp) {
     if (prevSeverity) prevSeverity.textContent = previous.severity || 'Moderate';
 
     if (statusTag) statusTag.textContent = `Temporal Delta: ${deltas.coverage_delta_pct || '0%'}`;
-  } else {
+  } else if (latest) {
     // Single scan state (initial baseline)
     if (prevTime) prevTime.textContent = 'Initial Cloud Baseline';
     if (prevCoverage) prevCoverage.textContent = 'Initial Run';
@@ -794,6 +911,16 @@ function renderComparisonUI(comp) {
     if (prevSeverity) prevSeverity.textContent = 'Baseline Est.';
 
     if (statusTag) statusTag.textContent = 'Initial Checkpoint in Firestore';
+  } else {
+    // Zero scans recorded yet
+    if (prevTime) prevTime.textContent = 'Awaiting 2nd Scan';
+    if (prevCoverage) prevCoverage.textContent = '--';
+    if (prevArea) prevArea.textContent = '--';
+    if (prevCo2) prevCo2.textContent = '--';
+    if (prevCredits) prevCredits.textContent = '--';
+    if (prevSeverity) prevSeverity.textContent = '--';
+
+    if (statusTag) statusTag.textContent = 'No Scans Recorded Yet';
   }
 }
 
@@ -809,7 +936,7 @@ function initRefreshTimelineButton() {
       await loadLocationTimeline(appState.selectedLocation.id);
       await loadLocationComparison(appState.selectedLocation.id);
       btn.classList.remove('loading');
-      showToast('☁️ Firestore Timeline Refreshed');
+      showToast('Firestore Timeline Synchronized');
     });
   }
 }
@@ -830,6 +957,14 @@ async function loadLocationTimeline(locationId) {
     const count = appState.timelineRecords.length;
     if (badge) badge.textContent = `${count} Cloud Scans`;
     if (navCount) navCount.textContent = count;
+
+    // Sync dashboard with location's latest scan, or reset if no scans
+    if (count > 0) {
+      const latestRecord = appState.timelineRecords[count - 1];
+      renderRecordInDashboard(latestRecord);
+    } else {
+      resetDashboardToAwaiting();
+    }
 
   } catch (err) {
     console.error('Error fetching timeline:', err);
@@ -886,8 +1021,8 @@ function renderTimelineStrip(records) {
         </div>
       </div>
       <div class="timeline-card-footer">
-        <span class="timeline-sync-pill">☁️ Synced</span>
-        <span class="timeline-inspect-btn">Compare ➜</span>
+        <span class="timeline-sync-pill"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:2px;"><path d="M19 16.9A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"/></svg> Synced</span>
+        <span class="timeline-inspect-btn">Compare &rarr;</span>
       </div>
     `;
 
@@ -963,10 +1098,10 @@ function initCharts() {
     appState.charts.algaeChart = new Chart(ctxAlgae, {
       type: 'line',
       data: {
-        labels: ['Baseline'],
+        labels: [],
         datasets: [{
           label: 'Bloom Coverage (%)',
-          data: [35],
+          data: [],
           borderColor: '#059669',
           backgroundColor: 'rgba(5, 150, 105, 0.08)',
           borderWidth: 2.5,
@@ -992,10 +1127,10 @@ function initCharts() {
     appState.charts.carbonChart = new Chart(ctxCarbon, {
       type: 'bar',
       data: {
-        labels: ['Baseline'],
+        labels: [],
         datasets: [{
           label: 'Daily CO₂ Fixation (kg)',
-          data: [3500],
+          data: [],
           backgroundColor: '#0D9488',
           hoverBackgroundColor: '#0F766E',
           borderRadius: 6,
@@ -1008,7 +1143,19 @@ function initCharts() {
 }
 
 function updateChartsWithTimeline(records) {
-  if (!records || records.length === 0) return;
+  if (!records || records.length === 0) {
+    if (appState.charts.algaeChart) {
+      appState.charts.algaeChart.data.labels = [];
+      appState.charts.algaeChart.data.datasets[0].data = [];
+      appState.charts.algaeChart.update();
+    }
+    if (appState.charts.carbonChart) {
+      appState.charts.carbonChart.data.labels = [];
+      appState.charts.carbonChart.data.datasets[0].data = [];
+      appState.charts.carbonChart.update();
+    }
+    return;
+  }
 
   // Format clean, human-readable labels so they don't overlap
   const labels = records.map((r, i) => {
