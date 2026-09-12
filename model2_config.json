@@ -1,0 +1,87 @@
+{
+  "model_name": "CarbonRegressor-xgboost-v1.0",
+  "model_type": "xgboost",
+  "feature_names": [
+    "bloom_area_ha",
+    "coverage_pct",
+    "severity_index",
+    "water_temp_c",
+    "ph_level",
+    "dissolved_oxygen_mg_l",
+    "solar_irradiance_w_m2"
+  ],
+  "target_names": [
+    "daily_biomass_kg",
+    "daily_co2_kg",
+    "monthly_co2_tons",
+    "carbon_credit_usd"
+  ],
+  "severity_names": [
+    "Low",
+    "Moderate",
+    "High"
+  ],
+  "n_estimators": 300,
+  "max_depth": 8,
+  "co2_per_kg_biomass": 1.8333333333333333,
+  "carbon_credit_usd_per_ton": 35.0,
+  "scaler_mean": [
+    25.0927733333332,
+    55.55811833333326,
+    1.1675,
+    21.899849999999944,
+    7.801424999999995,
+    8.027816666666617,
+    591.3746833333321
+  ],
+  "scaler_scale": [
+    42.32060207639559,
+    21.27459874574993,
+    0.7157353444768866,
+    6.929106241849113,
+    0.8976232520987516,
+    2.5624622728388067,
+    277.26456511017335
+  ],
+  "input_ranges": {
+    "bloom_area_ha": [
+      0.1,
+      500.0
+    ],
+    "coverage_pct": [
+      1.0,
+      100.0
+    ],
+    "severity_index": [
+      0,
+      1,
+      2
+    ],
+    "water_temp_c": [
+      5.0,
+      40.0
+    ],
+    "ph_level": [
+      5.5,
+      10.5
+    ],
+    "dissolved_oxygen_mg_l": [
+      0.5,
+      18.0
+    ],
+    "solar_irradiance_w_m2": [
+      50.0,
+      1200.0
+    ]
+  },
+  "biological_constants": {
+    "max_productivity_g_m2_day": 35.0,
+    "carbon_fraction": 0.5,
+    "co2_per_carbon_ratio": 3.6666666666666665,
+    "temp_optimal_c": 27.0,
+    "ph_optimal": 8.0,
+    "light_half_saturation_w_m2": 250.0,
+    "do_optimal_mg_l": 10.0
+  },
+  "created_at": "2026-09-12T03:56:51.462665"
+}

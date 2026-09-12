@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ALGAEVERSE — Bio-Carbon Intelligence & Satellite Digital Twin</title>
+  <meta name="description" content="dMRV Bio-Carbon Intelligence, Multimodal Satellite Vision & IoT Telemetry Platform connected to Firebase Firestore">
+  
+  <!-- Google Fonts: Outfit, Inter, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  
+  <!-- Custom Modern Environmental Intelligence Theme -->
+  <link rel="stylesheet" href="/static/css/style.css?v=4.0">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="header-glass">
+    <div class="nav-container">
+      <div class="brand-wrapper">
+        <div class="brand-logo-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">ALGAEVERSE</div>
+          <div class="brand-subtitle">Bio-Carbon Intelligence &bull; Satellite Digital Twin</div>
+        </div>
+      </div>
+
+      <!-- Tab Switcher (Page 1 vs Page 2) -->
+      <div class="tab-switcher" role="tablist">
+        <button class="tab-btn active" id="tab-btn-simulator" data-tab="simulator" role="tab">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          <span>1. IoT &amp; Satellite Simulator</span>
+        </button>
+        <button class="tab-btn" id="tab-btn-command" data-tab="command" role="tab">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="18" height="18" x="3" y="3" rx="2"/>
+            <path d="M3 9h18M9 21V9"/>
+          </svg>
+          <span>2. AI Results &amp; Firebase Timeline</span>
+          <span class="tab-badge-counter" id="nav-timeline-count">0</span>
+        </button>
+      </div>
+
+      <!-- Firestore Realtime Sync Status Pill -->
+      <div class="telemetry-status-pill" id="global-sync-pill" title="Firebase Firestore: hackout26-d49d5">
+        <div class="live-pulse-dot"></div>
+        <span id="global-sync-text">Firestore: Connected</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Wrapper -->
+  <main class="main-wrapper">
+
+    <!-- ====================================================================
+         PAGE 1: FIELD TELEMETRY & SENSOR SIMULATOR
+         ==================================================================== -->
+    <div class="page-view active" id="page-simulator">
+      
+      <!-- Step 1: Water Body Catchment Selector -->
+      <section class="card-glass">
+        <div class="section-header">
+          <div class="step-indicator">
+            <span class="step-badge">1</span>
+            <div>
+              <h2 class="step-title">Select Monitored Water Body</h2>
+              <p class="step-description">Choose a target lake, lagoon, or wetland catchment to observe and simulate.</p>
+            </div>
+          </div>
+          <span class="telemetry-counter-tag">5 Active Sentinel-2 Corridors</span>
+        </div>
+
+        <div class="location-grid" id="location-cards-grid">
+          <!-- Dynamically populated with fixed-ratio thumbnails by app.js -->
+        </div>
+      </section>
+
+      <!-- Step 2: 1-Click Scenario Presets -->
+      <div class="preset-bar-wrapper">
+        <div class="section-header" style="margin-bottom: 0.85rem;">
+          <div class="step-indicator">
+            <span class="step-badge">2</span>
+            <div>
+              <h3 class="step-title" style="font-size: 1.05rem;">Quick Scenario Presets</h3>
+              <p class="step-description">Instantly inject calibrated conditions to simulate different ecological states.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="preset-pills-row">
+          <button class="preset-pill-btn active" data-preset="optimal_harvest">
+            <span class="preset-icon">🌿</span>
+            <div class="preset-info">
+              <span class="preset-label">Optimal Summer Harvest</span>
+              <span class="preset-tag">High CO₂ Fixation &bull; Healthy DO</span>
+            </div>
+          </button>
+
+          <button class="preset-pill-btn" data-preset="anoxia_emergency">
+            <span class="preset-icon">⚠️</span>
+            <div class="preset-info">
+              <span class="preset-label">Severe Anoxia Emergency</span>
+              <span class="preset-tag">DO &lt; 2.0 mg/L &bull; Fish-Kill Risk</span>
+            </div>
+          </button>
+
+          <button class="preset-pill-btn" data-preset="pristine_baseline">
+            <span class="preset-icon">💧</span>
+            <div class="preset-info">
+              <span class="preset-label">Pristine Oligotrophic</span>
+              <span class="preset-tag">Clear Waters &bull; High Clarity</span>
+            </div>
+          </button>
+
+          <button class="preset-pill-btn" data-preset="eutrophication_spurt">
+            <span class="preset-icon">🧪</span>
+            <div class="preset-info">
+              <span class="preset-label">Rapid Eutrophication</span>
+              <span class="preset-tag">Nutrient Runoff &bull; Expansion</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3 & 4: Dual Simulator Grid -->
+      <div class="simulator-layout-grid">
+        
+        <!-- Left: Virtual IoT Sensor Suite (Clean & Uncluttered) -->
+        <div class="card-glass">
+          <div class="section-header">
+            <div class="step-indicator">
+              <span class="step-badge">3</span>
+              <div>
+                <h2 class="step-title">In-Situ IoT Sensor Suite</h2>
+                <p class="step-description">Fine-tune telemetry readings via smooth sliders or direct numeric entry.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="sensor-param-list">
+            
+            <!-- Water Temperature -->
+            <div class="sensor-param-row">
+              <div class="param-header">
+                <div class="param-title-group">
+                  <span class="param-icon">🌡️</span>
+                  <span class="param-name">Water Temperature</span>
+                </div>
+                <span class="param-status-tag tag-healthy" id="badge-water_temp_c">Optimal Growth</span>
+              </div>
+              <div class="slider-input-group">
+                <input type="range" class="custom-range-slider" id="slider-water_temp_c" min="5" max="40" step="0.1" value="26.8">
+                <div class="param-number-box">
+                  <input type="number" class="param-number-input" id="input-water_temp_c" min="5" max="40" step="0.1" value="26.8">
+                  <span class="param-unit">°C</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dissolved Oxygen -->
+            <div class="sensor-param-row">
+              <div class="param-header">
+                <div class="param-title-group">
+                  <span class="param-icon">🫧</span>
+                  <span class="param-name">Dissolved Oxygen (DO)</span>
+                </div>
+                <span class="param-status-tag tag-healthy" id="badge-dissolved_oxygen_mg_l">Healthy Aeration</span>
+              </div>
+              <div class="slider-input-group">
+                <input type="range" class="custom-range-slider" id="slider-dissolved_oxygen_mg_l" min="0.5" max="16.0" step="0.1" value="8.6">
+                <div class="param-number-box">
+                  <input type="number" class="param-number-input" id="input-dissolved_oxygen_mg_l" min="0.5" max="16.0" step="0.1" value="8.6">
+                  <span class="param-unit">mg/L</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Water pH Level -->
+            <div class="sensor-param-row">
+              <div class="param-header">
+                <div class="param-title-group">
+                  <span class="param-icon">🧪</span>
+                  <span class="param-name">Water pH Level</span>
+                </div>
+                <span class="param-status-tag tag-healthy" id="badge-ph_level">Optimal Buffer</span>
+              </div>
+              <div class="slider-input-group">
+                <input type="range" class="custom-range-slider" id="slider-ph_level" min="5.5" max="10.5" step="0.1" value="8.2">
+                <div class="param-number-box">
+                  <input type="number" class="param-number-input" id="input-ph_level" min="5.5" max="10.5" step="0.1" value="8.2">
+                  <span class="param-unit">pH</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Solar Irradiance -->
+            <div class="sensor-param-row">
+              <div class="param-header">
+                <div class="param-title-group">
+                  <span class="param-icon">☀️</span>
+                  <span class="param-name">Solar Irradiance (PAR)</span>
+                </div>
+                <span class="param-status-tag tag-healthy" id="badge-solar_irradiance_w_m2">High Photosynthesis</span>
+              </div>
+              <div class="slider-input-group">
+                <input type="range" class="custom-range-slider" id="slider-solar_irradiance_w_m2" min="50" max="1200" step="10" value="820">
+                <div class="param-number-box">
+                  <input type="number" class="param-number-input" id="input-solar_irradiance_w_m2" min="50" max="1200" step="10" value="820">
+                  <span class="param-unit">W/m²</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Estimated Bloom Area -->
+            <div class="sensor-param-row">
+              <div class="param-header">
+                <div class="param-title-group">
+                  <span class="param-icon">🗺️</span>
+                  <span class="param-name">Observed Catchment Area</span>
+                </div>
+                <span class="param-status-tag tag-healthy" id="badge-bloom_area_ha">Monitored Zone</span>
+              </div>
+              <div class="slider-input-group">
+                <input type="range" class="custom-range-slider" id="slider-bloom_area_ha" min="0.5" max="250" step="0.5" value="45.0">
+                <div class="param-number-box">
+                  <input type="number" class="param-number-input" id="input-bloom_area_ha" min="0.5" max="250" step="0.5" value="45.0">
+                  <span class="param-unit">ha</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Right: Satellite Imagery Studio & Broadcast Uplink -->
+        <div class="card-glass satellite-studio">
+          <div class="section-header">
+            <div class="step-indicator">
+              <span class="step-badge">4</span>
+              <div>
+                <h2 class="step-title">Multispectral Satellite Studio</h2>
+                <p class="step-description">Select from Sentinel-2 library or upload your custom aerial/satellite imagery.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Image Source Switcher -->
+          <div class="image-source-tabs">
+            <button class="image-source-tab active" id="tab-source-library">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+              </svg>
+              Sentinel-2 Library
+            </button>
+            <button class="image-source-tab" id="tab-source-upload">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
+              </svg>
+              Upload Custom Image
+            </button>
+          </div>
+
+          <!-- View A: Sentinel-2 Gallery -->
+          <div id="view-source-library">
+            <div class="sentinel-gallery-grid">
+              
+              <div class="gallery-tile selected" data-image="satellite_dense_bloom.jpg">
+                <img src="/static/images/satellite_dense_bloom.jpg" alt="Dense Algal Bloom" class="gallery-thumb">
+                <div class="gallery-caption">🟢 Dense Bloom</div>
+              </div>
+
+              <div class="gallery-tile" data-image="sample_lake_erie.png">
+                <img src="/static/images/sample_lake_erie.png" alt="Moderate Algal Bloom" class="gallery-thumb">
+                <div class="gallery-caption">🟡 Moderate Bloom</div>
+              </div>
+
+              <div class="gallery-tile" data-image="satellite_pristine_water.jpg">
+                <img src="/static/images/satellite_pristine_water.jpg" alt="Clear Water" class="gallery-thumb">
+                <div class="gallery-caption">💧 Clear Water</div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- View B: Upload Zone -->
+          <div id="view-source-upload" style="display: none;">
+            <div class="upload-drop-area" id="upload-drop-zone">
+              <div class="upload-icon">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
+                  <path d="M12 12v9"/><path d="m16 16-4-4-4 4"/>
+                </svg>
+              </div>
+              <div class="upload-prompt-text">Click or drag satellite imagery here</div>
+              <div class="upload-sub-text">PNG, JPG, or GeoTIFF &bull; Automatically saved to Firebase on broadcast</div>
+              <input type="file" id="file-upload-input" accept="image/*" style="display: none;">
+            </div>
+          </div>
+
+          <!-- Active Satellite Image Preview -->
+          <div class="satellite-preview-box">
+            <img src="/static/images/satellite_dense_bloom.jpg" alt="Satellite Preview" class="satellite-preview-img" id="satellite-active-preview">
+            <div class="preview-overlay-badge">Sentinel-2 MSI Level-2A (10m)</div>
+            <div class="preview-resolution-tag" id="preview-image-name">RGB True Color Compositor</div>
+          </div>
+
+          <!-- Broadcast Action & Status Console -->
+          <div class="broadcast-section">
+            <button class="btn-broadcast" id="btn-broadcast-telemetry">
+              <span>🚀 Broadcast Telemetry &bull; Run AI Pipeline &bull; Commit to Firebase</span>
+            </button>
+
+            <!-- Console Output -->
+            <div class="telemetry-terminal">
+              <div class="terminal-header">
+                <span>VIRTUAL GATEWAY LOG // FIRESTORE SYNC</span>
+                <div class="terminal-dots">
+                  <div class="terminal-dot dot-red"></div>
+                  <div class="terminal-dot dot-yellow"></div>
+                  <div class="terminal-dot dot-green"></div>
+                </div>
+              </div>
+              <div class="terminal-body" id="terminal-log-output">
+                <div class="log-line">
+                  <span class="log-time">[BOOT]</span>
+                  <span class="log-text-green">Simulator node active. ResNet-18 (Vision) &amp; XGBoost (Carbon) ready.</span>
+                </div>
+                <div class="log-line">
+                  <span class="log-time">[CLOUD]</span>
+                  <span class="log-text-cyan">Firebase Firestore connected: project 'hackout26-d49d5'.</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ====================================================================
+         PAGE 2: LIVE COMMAND CENTER & FIRESTORE HISTORICAL TIMELINE
+         ==================================================================== -->
+    <div class="page-view" id="page-command">
+      
+      <!-- Command Center Hero -->
+      <div class="command-hero">
+        <div>
+          <h1 class="hero-meta-title">
+            <span id="cmd-location-name">Chilika Lagoon</span>
+            <span class="location-coords-badge" id="cmd-coords">19.71° N, 85.32° E</span>
+          </h1>
+          <p class="hero-meta-sub">
+            Continuous Ecological Intelligence &bull; Last Observation: <span id="cmd-timestamp">Just now</span>
+            &bull; <strong style="color: var(--primary-emerald);">Firestore Synced</strong>
+          </p>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+          <button class="btn-action-outline" id="btn-refresh-timeline" title="Pull latest records from Firestore">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+            </svg>
+            Sync History
+          </button>
+          <button class="btn-action-primary" onclick="switchTab('simulator')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+            </svg>
+            Adjust in Simulator
+          </button>
+        </div>
+      </div>
+
+      <!-- Ecosystem Alert Banner -->
+      <div class="ecosystem-alert-banner alert-optimal" id="cmd-ecosystem-alert">
+        <span id="cmd-alert-status">🌿 Peak Biological Harvest Window</span>
+        &mdash; <span id="cmd-alert-rec" style="font-weight: 400;">Peak biomass density reached with optimal carbon fixation efficiency.</span>
+      </div>
+
+      <!-- 4-Card KPI Grid with Historical Deltas -->
+      <div class="kpi-metrics-grid">
+        
+        <!-- Bloom Area -->
+        <div class="kpi-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Algae Bloom Area</span>
+            <div class="kpi-icon-wrap">🗺️</div>
+          </div>
+          <div class="kpi-main-number" id="kpi-bloom-area">35.0 ha</div>
+          <div class="kpi-sub-row">
+            <span class="delta-badge delta-pos" id="kpi-bloom-delta">📈 Baseline Established</span>
+          </div>
+        </div>
+
+        <!-- Daily CO2 -->
+        <div class="kpi-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Daily CO₂ Sequestered</span>
+            <div class="kpi-icon-wrap">🌱</div>
+          </div>
+          <div class="kpi-main-number" id="kpi-daily-co2">6,786 kg</div>
+          <div class="kpi-sub-row">
+            <span class="delta-badge delta-pos" id="kpi-co2-delta">🚀 Active Sequestration</span>
+          </div>
+        </div>
+
+        <!-- Carbon Credits Monetization -->
+        <div class="kpi-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Daily Carbon Credit Value</span>
+            <div class="kpi-icon-wrap">💵</div>
+          </div>
+          <div class="kpi-main-number" id="kpi-credits-usd">$237.51</div>
+          <div class="kpi-sub-row">
+            <span style="font-size: 0.78rem; color: var(--text-muted);">Biomass Yield: <strong id="kpi-biomass" style="color: var(--text-main);">3,544 kg/day</strong></span>
+          </div>
+        </div>
+
+        <!-- Dissolved Oxygen -->
+        <div class="kpi-card">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Dissolved Oxygen</span>
+            <div class="kpi-icon-wrap">🫧</div>
+          </div>
+          <div class="kpi-main-number" id="kpi-dissolved-oxygen">8.6 mg/L</div>
+          <div class="kpi-sub-row">
+            <span class="delta-badge delta-pos" id="kpi-do-delta">🟢 Healthy Aerated</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ====================================================================
+           SIDE-BY-SIDE TEMPORAL COMPARISON PANEL (Previous Scan vs Latest Scan)
+           ==================================================================== -->
+      <section class="card-glass">
+        <div class="section-header" style="margin-bottom: 1rem;">
+          <div class="step-indicator">
+            <span class="step-badge" style="background: var(--primary-teal-light); color: var(--primary-teal); border-color: var(--primary-teal-border);">⚡</span>
+            <div>
+              <h2 class="step-title">Temporal Scan Progression &bull; Firestore Side-by-Side</h2>
+              <p class="step-description">Direct comparison between the previous cloud checkpoint and the latest telemetry broadcast.</p>
+            </div>
+          </div>
+          <span class="telemetry-counter-tag" id="comp-status-tag">Multi-Scan Comparison</span>
+        </div>
+
+        <div class="comparison-grid" id="comparison-view-grid">
+          
+          <!-- Left: Previous Scan -->
+          <div class="comparison-panel previous-scan" id="comp-panel-prev">
+            <div class="comparison-label">
+              <span>PREVIOUS CHECKPOINT</span>
+              <span id="comp-prev-time" style="font-family: var(--font-mono); font-weight: 500; text-transform: none; color: var(--text-muted); float: right;">Waiting for 2nd scan</span>
+            </div>
+            <img src="/static/images/satellite_dense_bloom.jpg" alt="Previous Observation" class="comparison-image" id="comp-prev-img">
+            
+            <div class="comparison-stats" id="comp-prev-stats">
+              <div class="comp-stat-row">
+                <span class="comp-stat-label">Bloom Coverage</span>
+                <span class="comp-stat-value" id="comp-prev-coverage">--</span>
+              </div>
+              <div class="comp-stat-row">
+                <span class="comp-stat-label">Monitored Area</span>
+                <span class="comp-stat-value" id="comp-prev-area">--</span>
+              </div>
+              <div class="comp-stat-row">
+                <span class="comp-stat-label">Daily CO₂ Fixation</span>
+                <span class="comp-stat-value" id="comp-prev-co2">--</span>
+              </div>
+              <div class="comp-stat-row">
+                <span class="comp-stat-label">Carbon Credit Value</span>
+                <span class="comp-stat-value" id="comp-prev-credits">--</span>
+              </div>
+              <div class="comp-stat-row">
+                <span class="comp-stat-label">Severity Level</span>
+                <span class="comp-stat-value" id="comp-prev-severity">--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Center Divider with VS tag -->
+          <div class="comparison-divider" id="comp-divider">
+          </div>
+
+          <!-- Right: Latest Scan -->
+          <div class="comparison-panel latest-scan" id="comp-panel-latest">
+            <div class="comparison-label latest-label">
+              <span>LATEST BROADCAST</span>
+              <span id="comp-latest-time" style="font-family: var(--font-mono); font-weight: 500; text-transform: none; color: var(--primary-emerald); float: right;">Current Active</span>
+            </div>
+            <img src="/static/images/satellite_dense_bloom.jpg" alt="Latest Observation" class="comparison-image" id="comp-latest-img">
+            
+            <div class="comparison-stats" id="comp-latest-stats">
+              <div class="comp-stat-row">
+                <span class="comp-stat-label">Bloom Coverage</span>
+                <span class="comp-stat-value" id="comp-latest-coverage">78.0%</span>
+              </div>
+              <div class="comp-stat-row">
+                <span class="comp-stat-label">Monitored Area</span>
+                <span class="comp-stat-value" id="comp-latest-area">45.0 ha</span>
+              </div>
+              <div class="comp-stat-row">
+                <span class="comp-stat-label">Daily CO₂ Fixation</span>
+                <span class="comp-stat-value" id="comp-latest-co2">6,786 kg</span>
+              </div>
+              <div class="comp-stat-row">
+                <span class="comp-stat-label">Carbon Credit Value</span>
+                <span class="comp-stat-value" id="comp-latest-credits">$237.51</span>
+              </div>
+              <div class="comp-stat-row">
+                <span class="comp-stat-label">Severity Level</span>
+                <span class="comp-stat-value" id="comp-latest-severity">High</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           FIRESTORE TIMELINE HISTORY STRIP
+           ==================================================================== -->
+      <section class="card-glass timeline-section">
+        <div class="timeline-section-header">
+          <div>
+            <div class="timeline-section-title">Temporal Observation Timeline &bull; Firebase Firestore</div>
+            <p class="step-description" style="margin-top: 0.2rem;">Chronological audit trail of all previous multimodal scans committed to cloud database.</p>
+          </div>
+          <div class="timeline-count-badge" id="timeline-badge-count">0 Cloud Scans</div>
+        </div>
+
+        <div class="timeline-scroll-strip" id="timeline-container">
+          <!-- Dynamically populated via app.js -->
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           AI MODEL INTELLIGENCE GRID (ResNet-18 Vision & XGBoost Carbon)
+           ==================================================================== -->
+      <div class="command-body-grid">
+        
+        <!-- Left: Satellite Vision Analysis (Model 1) -->
+        <div class="card-glass visual-analysis-panel" style="margin-bottom: 0;">
+          <div class="section-header" style="margin-bottom: 0.75rem;">
+            <div>
+              <h2 class="step-title">Satellite Vision Intelligence</h2>
+              <p class="step-description">Multispectral feature extraction via PyTorch ResNet-18 classifier.</p>
+            </div>
+            <span class="location-type-pill">Model 1 (ResNet-18)</span>
+          </div>
+
+          <div style="position: relative; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 1rem;">
+            <img src="/static/images/satellite_dense_bloom.jpg" alt="Analyzed Satellite View" class="satellite-main-display" id="cmd-satellite-img">
+            <div class="preview-overlay-badge" id="cmd-img-tag">Sentinel-2 Scene</div>
+          </div>
+
+          <div class="model1-badge-strip">
+            <div class="badge-tag-lg badge-severity" id="cmd-severity-badge">
+              <span>🟢 Severity: High</span>
+            </div>
+            <div class="badge-tag-lg badge-confidence" id="cmd-confidence-badge">
+              <span>🎯 Confidence: 89.2%</span>
+            </div>
+            <div class="badge-tag-lg badge-coverage" id="cmd-coverage-badge">
+              <span>📐 Coverage: 78.0%</span>
+            </div>
+          </div>
+
+          <!-- Class Probabilities Breakdown -->
+          <div style="margin-top: 1.2rem; background: var(--bg-surface-subtle); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 0.6rem; letter-spacing: 0.05em;">Vision Classification Confidence</div>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 3px;">
+                  <span style="font-weight: 500;">Dense Bloom</span>
+                  <span id="prob-high-val" style="font-family: var(--font-mono); font-weight: 700; color: #DC2626;">89.2%</span>
+                </div>
+                <div style="height: 6px; background: #E2E8F0; border-radius: 4px; overflow: hidden;">
+                  <div id="prob-high-bar" style="width: 89.2%; height: 100%; background: #EF4444; border-radius: 4px;"></div>
+                </div>
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 3px;">
+                  <span style="font-weight: 500;">Moderate Bloom</span>
+                  <span id="prob-mod-val" style="font-family: var(--font-mono); font-weight: 700; color: #D97706;">8.5%</span>
+                </div>
+                <div style="height: 6px; background: #E2E8F0; border-radius: 4px; overflow: hidden;">
+                  <div id="prob-mod-bar" style="width: 8.5%; height: 100%; background: #F59E0B; border-radius: 4px;"></div>
+                </div>
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 3px;">
+                  <span style="font-weight: 500;">Clear Water</span>
+                  <span id="prob-low-val" style="font-family: var(--font-mono); font-weight: 700; color: #059669;">2.3%</span>
+                </div>
+                <div style="height: 6px; background: #E2E8F0; border-radius: 4px; overflow: hidden;">
+                  <div id="prob-low-bar" style="width: 2.3%; height: 100%; background: #10B981; border-radius: 4px;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Carbon Sequestration Projections (Model 2) -->
+        <div class="card-glass" style="display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 0;">
+          <div>
+            <div class="section-header" style="margin-bottom: 0.75rem;">
+              <div>
+                <h2 class="step-title">Carbon Accounting &amp; Revenue Projection</h2>
+                <p class="step-description">Calibrated against algal photosynthetic fixation models ($35/tonne CO₂).</p>
+              </div>
+              <span class="location-type-pill">Model 2 (XGBoost)</span>
+            </div>
+
+            <!-- Offset Stats Grid -->
+            <div class="carbon-projection-grid">
+              <div class="carbon-stat-box">
+                <div class="carbon-stat-label">Monthly CO₂ Offset</div>
+                <div class="carbon-stat-value" id="cmd-monthly-tons">203.6 t</div>
+                <div class="carbon-stat-sub">Verified atmospheric sequestration</div>
+              </div>
+
+              <div class="carbon-stat-box">
+                <div class="carbon-stat-label">Projected Annual Offset</div>
+                <div class="carbon-stat-value" id="cmd-annual-tons" style="color: var(--primary-emerald);">2,476.9 t</div>
+                <div class="carbon-stat-sub">Annualized baseline extrapolation</div>
+              </div>
+            </div>
+
+            <!-- Revenue Highlight Box -->
+            <div class="revenue-highlight-box">
+              <div class="revenue-label">Estimated Annual Carbon Credit Revenue</div>
+              <div class="revenue-value" id="cmd-annual-credits">$86,691.50 USD</div>
+              <div class="revenue-sub">Eligible for Verra / Gold Standard blue carbon tokenization &amp; dMRV verification.</div>
+            </div>
+
+            <!-- Recommendation Card -->
+            <div class="recommendation-card">
+              <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.4rem;">
+                <span>🎯 dMRV Autonomous Recommendation</span>
+              </div>
+              <p class="recommendation-text" id="cmd-recommendation-box">
+                Harvest biomass to prevent nighttime anoxia. High carbon credit monetization potential.
+              </p>
+            </div>
+          </div>
+
+          <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
+            <button class="btn-broadcast" onclick="switchTab('simulator')">
+              <span>⚙️ Adjust Telemetry in Simulator</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Historical Trend Charts (Chart.js) -->
+      <div class="charts-section-grid" style="margin-top: 1.5rem;">
+        
+        <div class="chart-container-box">
+          <div class="chart-header-row">
+            <div class="chart-title">📈 Algae Bloom Coverage Progression</div>
+            <div class="chart-legend-badge">Coverage (%)</div>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-algae-trend"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-container-box">
+          <div class="chart-header-row">
+            <div class="chart-title">🌱 Daily Carbon Sequestration Rate</div>
+            <div class="chart-legend-badge">CO₂ Fixation (kg)</div>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-carbon-trend"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Toast Notification -->
+  <div class="toast-msg" id="toast-notification"></div>
+
+  <!-- Application Logic -->
+  <script src="/static/js/app.js?v=4.0"></script>
+
+</body>
+</html>

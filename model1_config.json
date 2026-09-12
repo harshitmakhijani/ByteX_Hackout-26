@@ -1,0 +1,43 @@
+{
+  "model_name": "AlgaeClassifier-ResNet18-Sentinel2-v1.0",
+  "backbone": "resnet18",
+  "num_classes": 3,
+  "class_names": [
+    "Low",
+    "Moderate",
+    "High"
+  ],
+  "img_size": 224,
+  "normalization": {
+    "mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "std": [
+      0.229,
+      0.224,
+      0.225
+    ]
+  },
+  "ndvi_thresholds": {
+    "algae_low": 0.0,
+    "algae_moderate": 0.15,
+    "algae_high": 0.3
+  },
+  "pixel_resolution_m": 10,
+  "training_info": {
+    "dataset": "kostaspic/amfitrite-inland-waters-hab-sentinel2",
+    "num_samples": 2500,
+    "train_split": 0.8,
+    "epochs": 15,
+    "best_val_accuracy": 0.806,
+    "date": "2026-09-11T21:06:30.236989"
+  },
+  "metrics": {
+    "accuracy": 0.806,
+    "precision": 0.8024,
+    "recall": 0.806,
+    "f1_score": 0.8038
+  }
+}

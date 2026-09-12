@@ -1,0 +1,39 @@
+{
+  "best_model": "xgboost",
+  "training_samples": 12000,
+  "validation_samples": 3000,
+  "models": {
+    "xgboost": {
+      "avg_r2": 0.9223,
+      "per_target_r2": {
+        "daily_biomass_kg": 0.9244,
+        "daily_co2_kg": 0.921,
+        "monthly_co2_tons": 0.923,
+        "carbon_credit_usd": 0.9208
+      },
+      "per_target_mae": {
+        "daily_biomass_kg": 187.8371,
+        "daily_co2_kg": 346.5036,
+        "monthly_co2_tons": 9.3376,
+        "carbon_credit_usd": 325.8573
+      },
+      "train_time_seconds": 22.0
+    },
+    "random_forest": {
+      "avg_r2": 0.8515,
+      "per_target_r2": {
+        "daily_biomass_kg": 0.8513,
+        "daily_co2_kg": 0.8514,
+        "monthly_co2_tons": 0.8515,
+        "carbon_credit_usd": 0.8518
+      },
+      "per_target_mae": {
+        "daily_biomass_kg": 280.5255,
+        "daily_co2_kg": 514.4059,
+        "monthly_co2_tons": 13.883,
+        "carbon_credit_usd": 485.7646
+      },
+      "train_time_seconds": 45.01
+    }
+  }
+}

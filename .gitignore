@@ -1,0 +1,26 @@
+# Environments & Dependencies
+.venv/
+venv/
+ENV/
+env/
+
+# Python Cache & Bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# System & OS
+.DS_Store
+Thumbs.db
+home/
+
+# Logs & Temporary Files
+*.log
+scratch/
+backend/uploads/upload_*
+
+# IDE & Editor Configs
+.idea/
+.vscode/
