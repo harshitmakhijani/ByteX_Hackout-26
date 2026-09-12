@@ -977,9 +977,10 @@ function renderTimelineStrip(records) {
 
   if (!records || records.length === 0) {
     container.innerHTML = `
-      <div class="empty-state" style="padding: 1.5rem; width: 100%;">
-        <div class="empty-state-title">No Previous Scans in Firestore Yet</div>
-        <div class="empty-state-sub">Broadcast your first telemetry reading to establish a cloud timeline.</div>
+      <div class="empty-state timeline-empty-box" style="padding: 2.2rem 1.5rem; text-align: center; width: 100%; border: 1px dashed rgba(167,243,208,0.3); border-radius: var(--radius-lg); background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px);">
+        <div style="font-size: 2.5rem; margin-bottom: 0.6rem; line-height: 1;">📡</div>
+        <div class="empty-state-title" style="color: #ffffff !important; font-size: 1.1rem; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 0.35rem;">No Previous Scans in Firestore Yet</div>
+        <div class="empty-state-sub" style="color: #cbd5e1 !important; font-size: 0.9rem; font-weight: 500;">Broadcast your first telemetry reading in Step 1 to establish a cloud timeline.</div>
       </div>
     `;
     return;
