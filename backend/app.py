@@ -41,6 +41,9 @@ app.add_middleware(
 
 # Mount static files
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.mount("/css", StaticFiles(directory=os.path.join(STATIC_DIR, "css")), name="css")
+app.mount("/js", StaticFiles(directory=os.path.join(STATIC_DIR, "js")), name="js")
+app.mount("/images", StaticFiles(directory=os.path.join(STATIC_DIR, "images")), name="images")
 app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 

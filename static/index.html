@@ -79,8 +79,10 @@
           <span class="telemetry-counter-tag">5 Active Sentinel-2 Corridors</span>
         </div>
 
-        <div class="location-grid" id="location-cards-grid">
-          <!-- Dynamically populated with fixed-ratio thumbnails by app.js -->
+        <div class="location-marquee-wrapper">
+          <div class="location-grid" id="location-cards-grid">
+            <!-- Dynamically populated with fixed-ratio thumbnails by app.js -->
+          </div>
         </div>
       </section>
 
@@ -585,34 +587,37 @@
           </div>
 
           <!-- Class Probabilities Breakdown -->
-          <div style="margin-top: 1.2rem; background: var(--bg-surface-subtle); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
-            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 0.6rem; letter-spacing: 0.05em;">Vision Classification Confidence</div>
-            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <div style="margin-top: 1.25rem; background: #FFFFFF; padding: 1.15rem; border-radius: var(--radius-lg); border: 1.5px solid var(--border-subtle); box-shadow: var(--shadow-xs);">
+            <div style="font-size: 0.76rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 0.85rem; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: space-between;">
+              <span>Vision Classification Confidence</span>
+              <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--primary-emerald);">PyTorch Multi-Class</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
               <div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 3px;">
-                  <span style="font-weight: 500;">Dense Bloom</span>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 5px;">
+                  <span style="font-weight: 600; color: var(--text-main);">Dense Bloom</span>
                   <span id="prob-high-val" style="font-family: var(--font-mono); font-weight: 700; color: #DC2626;">0%</span>
                 </div>
-                <div style="height: 6px; background: #E2E8F0; border-radius: 4px; overflow: hidden;">
-                  <div id="prob-high-bar" style="width: 0%; height: 100%; background: #EF4444; border-radius: 4px;"></div>
+                <div style="height: 8px; background: #F1F5F9; border-radius: 9999px; overflow: hidden; border: 1px solid #E2E8F0;">
+                  <div id="prob-high-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #EF4444 0%, #DC2626 100%); border-radius: 9999px; transition: width 0.4s var(--ease-out-expo);"></div>
                 </div>
               </div>
               <div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 3px;">
-                  <span style="font-weight: 500;">Moderate Bloom</span>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 5px;">
+                  <span style="font-weight: 600; color: var(--text-main);">Moderate Bloom</span>
                   <span id="prob-mod-val" style="font-family: var(--font-mono); font-weight: 700; color: #D97706;">0%</span>
                 </div>
-                <div style="height: 6px; background: #E2E8F0; border-radius: 4px; overflow: hidden;">
-                  <div id="prob-mod-bar" style="width: 0%; height: 100%; background: #F59E0B; border-radius: 4px;"></div>
+                <div style="height: 8px; background: #F1F5F9; border-radius: 9999px; overflow: hidden; border: 1px solid #E2E8F0;">
+                  <div id="prob-mod-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #F59E0B 0%, #D97706 100%); border-radius: 9999px; transition: width 0.4s var(--ease-out-expo);"></div>
                 </div>
               </div>
               <div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 3px;">
-                  <span style="font-weight: 500;">Clear Water</span>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 5px;">
+                  <span style="font-weight: 600; color: var(--text-main);">Clear Water</span>
                   <span id="prob-low-val" style="font-family: var(--font-mono); font-weight: 700; color: #059669;">0%</span>
                 </div>
-                <div style="height: 6px; background: #E2E8F0; border-radius: 4px; overflow: hidden;">
-                  <div id="prob-low-bar" style="width: 0%; height: 100%; background: #10B981; border-radius: 4px;"></div>
+                <div style="height: 8px; background: #F1F5F9; border-radius: 9999px; overflow: hidden; border: 1px solid #E2E8F0;">
+                  <div id="prob-low-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #10B981 0%, #059669 100%); border-radius: 9999px; transition: width 0.4s var(--ease-out-expo);"></div>
                 </div>
               </div>
             </div>

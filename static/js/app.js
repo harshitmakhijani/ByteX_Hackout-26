@@ -209,7 +209,9 @@ function renderLocationCards() {
 
   container.innerHTML = '';
 
-  LOCATIONS.forEach(loc => {
+  const marqueeItems = [...LOCATIONS, ...LOCATIONS];
+
+  marqueeItems.forEach(loc => {
     const isSelected = loc.id === appState.selectedLocation.id;
     const card = document.createElement('div');
     card.className = `location-card ${isSelected ? 'selected' : ''}`;
@@ -217,7 +219,7 @@ function renderLocationCards() {
 
     card.innerHTML = `
       <div class="location-thumb-wrapper">
-        <img src="/static/images/${loc.sample_image}" alt="${loc.name}" class="location-thumb">
+        <img src="images/${loc.sample_image}" alt="${loc.name}" class="location-thumb" onerror="this.src='/static/images/${loc.sample_image}'">
         <div class="location-sensor-badge">
           <span class="sensor-live-dot"></span>
           <span>${loc.sensor || 'Sentinel-2 MSI'}</span>
@@ -318,10 +320,13 @@ function initSensorInputs() {
     const input = document.getElementById(`input-${param}`);
 
     if (slider && input) {
+      updateSliderTrackFill(slider);
+
       slider.addEventListener('input', (e) => {
         const val = parseFloat(e.target.value);
         input.value = val;
         appState.sensors[param] = val;
+        updateSliderTrackFill(slider);
         updateParamStatusBadge(param, val);
         updateRangePillsActive(param, val);
       });
@@ -330,6 +335,7 @@ function initSensorInputs() {
         const val = parseFloat(e.target.value);
         slider.value = val;
         appState.sensors[param] = val;
+        updateSliderTrackFill(slider);
         updateParamStatusBadge(param, val);
         updateRangePillsActive(param, val);
       });
@@ -348,13 +354,25 @@ function initSensorInputs() {
   });
 }
 
+function updateSliderTrackFill(slider) {
+  if (!slider) return;
+  const min = parseFloat(slider.min) || 0;
+  const max = parseFloat(slider.max) || 100;
+  const val = parseFloat(slider.value) || 0;
+  const pct = Math.max(0, Math.min(100, ((val - min) / (max - min)) * 100));
+  slider.style.background = `linear-gradient(to right, #059669 0%, #0D9488 ${pct}%, #E2E8F0 ${pct}%, #E2E8F0 100%)`;
+}
+
 function updateSensorValue(param, val) {
   appState.sensors[param] = val;
 
   const slider = document.getElementById(`slider-${param}`);
   const input = document.getElementById(`input-${param}`);
 
-  if (slider) slider.value = val;
+  if (slider) {
+    slider.value = val;
+    updateSliderTrackFill(slider);
+  }
   if (input) input.value = val;
 
   updateParamStatusBadge(param, val);
